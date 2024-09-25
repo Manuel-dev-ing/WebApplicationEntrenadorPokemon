@@ -1,0 +1,91 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    @model LoginViewModel
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/WebApplicationEntrenadorPokemon.styles.css" asp-append-version="true" />
+    
+
+    @{
+        ViewData["title"] = "Login";
+        Layout = null;
+
+    }
+</head>
+
+
+<body>
+
+    <main>
+        <div class="container">
+
+            <section class="section register min-vh-100 d-flex flex-column align-items-center justify-content-center py-4">
+                <div class="container">
+                    <div class="row justify-content-center">
+                        <div class="col-lg-4 col-md-6 d-flex flex-column align-items-center justify-content-center">
+
+                            <div class="card mb-3">
+
+                                <div class="card-body">
+
+                                    <div class="pt-4 pb-2">
+                                        <h5 class="card-title text-center pb-0 fs-4">Inicia Sesion en tu Cuenta</h5>
+                                        <p class="text-center small">Ingrese su ID Entrenador y contraseña para iniciar sesion</p>
+                                    </div>
+
+                                    <form class="row g-3" asp-action="Login" asp-controller="Usuarios">
+
+                                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+
+                                        <div class="col-12">
+                                            <label asp-for="IDEntrenador" class="form-label"></label>
+
+                                            <input asp-for="IDEntrenador" class="form-control">
+                                            <span asp-validation-for="IDEntrenador" class="text-danger"></span>
+                                        </div>
+
+                                        <div class="col-12">
+                                            <label asp-for="Password" class="form-label"></label>
+                                            <input asp-for="Password" class="form-control">
+                                            <span asp-validation-for="Password" class="text-danger"></span>
+                                        </div>
+
+                                        <div class="col-12">
+                                            <button class="btn btn-primary w-100" type="submit">Acceder</button>
+                                        </div>
+                                        <div class="col-12">
+                                            <p class="small mb-0">¿No tienes cuenta? <a asp-action="Registro" asp-controller="Usuarios">Crea una Cuenta</a></p>
+                                        </div>
+                                    </form>
+
+                                </div>
+                            </div>
+
+
+
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+
+        </div>
+    </main><!-- End #main -->
+
+
+
+    
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <partial name="_ValidationScriptsPartial" />
+    
+</body>
+</html>
+
+
+
