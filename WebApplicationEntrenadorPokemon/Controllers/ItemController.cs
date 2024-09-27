@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using WebApplicationEntrenadorPokemon.DTOs;
 using WebApplicationEntrenadorPokemon.Entidades;
+using WebApplicationEntrenadorPokemon.Servicios;
 
 namespace WebApplicationEntrenadorPokemon.Controllers
 {
@@ -10,11 +11,11 @@ namespace WebApplicationEntrenadorPokemon.Controllers
     [ApiController]
     public class ItemController : Controller
     {
-        private readonly ApplicationDBContext context;
+        private readonly IRepositorioItems repositorioItems;
 
-        public ItemController(ApplicationDBContext context)
+        public ItemController(IRepositorioItems repositorioItems)
         {
-            this.context = context;
+            this.repositorioItems = repositorioItems;
         }
 
 
@@ -23,19 +24,12 @@ namespace WebApplicationEntrenadorPokemon.Controllers
         {
             var entrenadorId = Convert.ToInt32(User.FindFirst(ClaimTypes.Email)?.Value);
 
-            var item = new Item
+            var resultado = await repositorioItems.guardarItem(request, entrenadorId);
+
+            if (resultado == "Noguardado")
             {
-                EntrenadorId = entrenadorId,
-                ItemId = request.id,
-                Nombre = request.nombre,
-                Descripcion = request.descripcion,
-                Sprite = request.imagen,
-                FechaCreacion = DateTime.UtcNow
-            };
-
-
-            context.Add(item);
-            await context.SaveChangesAsync();
+                return NotFound();
+            }
 
 
             return Created();
@@ -58,16 +52,13 @@ namespace WebApplicationEntrenadorPokemon.Controllers
         public async Task<ActionResult<List<itemDTO>>> delete(int id)
         {
             var entrenadorId = Convert.ToInt32(User.FindFirst(ClaimTypes.Email)?.Value);
-            var resultado = await context.Item.FirstOrDefaultAsync(x => x.ItemId == id && x.EntrenadorId == entrenadorId);
 
-            if (resultado is null)
+            var resultado = await repositorioItems.eliminarItems(entrenadorId, id);
+
+            if (resultado == "notFound" || resultado == "Noguardado")
             {
                 return NotFound();
             }
-
-            context.Remove(resultado);
-            await context.SaveChangesAsync();
-
 
 
             var entidad = await itemsAgrupadosCantidad(entrenadorId);
@@ -81,18 +72,7 @@ namespace WebApplicationEntrenadorPokemon.Controllers
         private async Task<List<itemDTO>> itemsAgrupadosCantidad(int entrenadorId)
         {
 
-            var entidad = await context.Item.Where(x => x.EntrenadorId == entrenadorId)
-               .GroupBy(i => new { i.ItemId, i.Nombre, i.Descripcion, i.Sprite })
-               .Select(a => new itemDTO
-               {
-
-                   itemId = a.Key.ItemId,
-                   nombre = a.Key.Nombre,
-                   descripcion = a.Key.Descripcion,
-                   sprite = a.Key.Sprite,
-                   TotalItemId = a.Count()
-
-               }).ToListAsync();
+            var entidad = await repositorioItems.itemsAgrupadosCantidad(entrenadorId);
 
             return entidad;
         }

@@ -16,6 +16,8 @@ builder.Services.AddTransient<IRepositorioUsuarios, RepositorioUsuarios>();
 
 builder.Services.AddTransient<IRepositorioPokemon, RepositorioPokemon>();
 
+builder.Services.AddTransient<IRepositorioItems, RepositorioItems>();
+
 builder.Services.AddTransient<IUserStore<Entrenador>, UsuarioStore>();
 
 builder.Services.AddTransient<SignInManager<Entrenador>>();

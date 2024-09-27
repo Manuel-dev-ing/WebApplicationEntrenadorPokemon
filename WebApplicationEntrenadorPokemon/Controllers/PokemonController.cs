@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 using System.Security.Claims;
 using WebApplicationEntrenadorPokemon.DTOs;
 using WebApplicationEntrenadorPokemon.Entidades;
+using WebApplicationEntrenadorPokemon.Servicios;
 
 namespace WebApplicationEntrenadorPokemon.Controllers
 {
@@ -10,24 +12,22 @@ namespace WebApplicationEntrenadorPokemon.Controllers
     [ApiController]
     public class PokemonController : Controller
     {
-        private readonly ApplicationDBContext context;
+        private readonly IRepositorioPokemon repositorioPokemon;
 
-        public PokemonController(ApplicationDBContext context)
+        public PokemonController(IRepositorioPokemon repositorioPokemon)
         {
-            this.context = context;
+            this.repositorioPokemon = repositorioPokemon;
         }
 
 
         [HttpGet]
         public async Task<List<tipoPokemonDTO>> Get()
         {
-            var entidad = await context.TiposPokemon.Select(tipo => new tipoPokemonDTO
-            {
-                id = tipo.Id,
-                tipoPokemon = tipo.tipoPokemon
-            }).ToListAsync();
+
+            var entidad = await repositorioPokemon.obtenerListadoTiposPokemon();
 
             return entidad;
+
         }
 
         [HttpPost]
@@ -36,34 +36,22 @@ namespace WebApplicationEntrenadorPokemon.Controllers
 
             var entrenadorId = Convert.ToInt32(User.FindFirst(ClaimTypes.Email)?.Value);
 
+            var resultado = await repositorioPokemon.guardarPokemon(request, entrenadorId);
 
-            var pokemon = new Pokemon
-            {
-                EntrenadorId = entrenadorId,
-                nombre = request.nombre,
-                tipo = request.tipos,
-                altura = request.altura,
-                peso = request.peso,
-                officialArtwork = request.imagen,
-                FechaCreacion = DateTime.UtcNow
-            };
-
-            var entidad = context.Pokemon.Where(x => x.EntrenadorId == entrenadorId).Count();
-
-            if (entidad >= 6)
+            if (resultado == "400")
             {
                 var mensaje = "No puedes guardar mas de 6 pokemon";
-                return BadRequest(new { mensaje = mensaje, code = "400" });
+                var code = "400";
+                return BadRequest(new { mensaje = mensaje, code = code});
             }
 
-
-            var pok = entidad;
-
-            context.Add(pokemon);
-            await context.SaveChangesAsync();
-
+            if (resultado == "Noguardado")
+            {
+                return BadRequest();
+            }
 
             return Created();
+
         }
 
 
@@ -72,37 +60,26 @@ namespace WebApplicationEntrenadorPokemon.Controllers
         {
             var entrenadorId = Convert.ToInt32(User.FindFirst(ClaimTypes.Email)?.Value);
 
-            var entidad = await context.Pokemon.Where(x => x.EntrenadorId == entrenadorId).Select(a => new PokemonDTO
-            {
-                id = a.id,
-                EntrenadorId = a.EntrenadorId,
-                nombre = a.nombre,
-                tipo = a.tipo,
-                altura = a.altura,
-                peso = a.peso,
-                officialArtwork = a.officialArtwork,
-                FechaCreacion = a.FechaCreacion
+            var entidad = await repositorioPokemon.GetPokemonsAsync(entrenadorId);
 
-            }).ToListAsync();
 
             return entidad;
-            //return Ok(new { mensaje = "OK MENSAJE POKEMON"});
+            
         }
 
         [HttpDelete("{id:int}")]
         public async Task<ActionResult> delete(int id)
         {
             var entrenadorId = Convert.ToInt32(User.FindFirst(ClaimTypes.Email)?.Value);
-            var resultado = await context.Pokemon.FirstOrDefaultAsync(x => x.id == id && x.EntrenadorId == entrenadorId);
 
-            if (resultado is null)
+            var resultado = await repositorioPokemon.elimnarPokemon(entrenadorId, id);
+
+            if (resultado == "404")
             {
                 return NotFound();
             }
 
-            context.Remove(resultado);
-            await context.SaveChangesAsync();
-
+            
             return Ok();
 
         }
