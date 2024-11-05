@@ -47,10 +47,10 @@ async function buscarPokemon() {
     if (respuesta.ok) {
 
         var data = await respuesta.json();
-        console.log("data: ", data)
+        
         Datospok = data.result;
         offset = 20
-        console.log("offset: ", offset)
+        
 
         pokemons(data)
         spinnerelement.remove();
@@ -155,7 +155,7 @@ function paginaSiguientePokemon() {
         if (respuesta.ok) {
             spinnerelement.remove();
             var data = await respuesta.json();
-            console.log("data: ", data)
+            
 
             arrayPaginaSiguiente.pop()
 
@@ -167,7 +167,6 @@ function paginaSiguientePokemon() {
             const ultimosPokemons = [];
             var datos = data.results;
             offset += 20;
-            console.log("pagina siguiente offset: ", offset)
 
             if (offset == 160) {
                 
@@ -176,9 +175,7 @@ function paginaSiguientePokemon() {
                 for (var i = 0; i <= 10; i++) {
                     ultimosPokemons.push(datos[i])
                 }
-                console.log("mostrando hasta mew...")
 
-                console.log(ultimosPokemons)
                 ultimosPokemons.forEach((res) => mostrarPokemon(res))
 
             } else {
@@ -191,7 +188,6 @@ function paginaSiguientePokemon() {
             //arrayDatos.push(data);
 
             var previous = arrayPaginaAnterior[arrayPaginaAnterior.length - 1]
-            console.log("boton previous: ", previous)
             if (previous != null) {
                 desabilitarBtnPrevious(false)
             }
@@ -275,11 +271,11 @@ async function obtenertiposPokemon() {
     })
 
     var tiposPokemon = await respuesta.json();
-
-    filtrarTipoPokemon(tiposPokemon);
-    /*tiposPokemon.forEach(tipo => {
+    tiposPokemon.forEach(tipo => {
         console.log(tipo.tipoPokemon)
-    })*/
+    })
+    filtrarTipoPokemon(tiposPokemon);
+    
 }
 
 obtenertiposPokemon();
@@ -290,6 +286,7 @@ function filtrarTipoPokemon(tiposPokemon) {
 
         if(query != "") {
             const filterpokemon = tiposPokemon.filter((tipo) => tipo.tipoPokemon.includes(query));
+            console.log(filterpokemon)
             mostrarTiposPokemon(filterpokemon)
         } else {
             query = "";
@@ -322,7 +319,7 @@ function mostrarTiposPokemon(filterpokemon) {
             var tipo = event.target.innerText
 
             console.log("Mostrar tiposPokemon: ", tipo);
-
+            li.remove();
             //let url = Datospok.map((pok) => pok.url);
             myfunction(tipo)
 
@@ -355,22 +352,6 @@ async function myfunction(tipo) {
 
         }
     }
-        /*url.forEach(async function(res) {
-            const respuesta = await fetch(res, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            var data = await respuesta.json();
-
-            const tipos = data.types.map(type => type.type.name);
-            if (tipos.some(tipo => tipo.includes(tipoPokemon))) {
-                mostrar(data);
-                console.log("myfunction data: ", data)
-
-            }*/
         
    spinnerelement.remove();
 
@@ -420,8 +401,6 @@ async function guardarPokemon(data) {
         if (!respuesta.ok) {
             var result = await respuesta.json();
 
-            console.log("respuesta: ", typeof (result.code))
-            console.log(result)
             if (result.code == 400) {
 
                 console.log("Si entro en el if result.code")
